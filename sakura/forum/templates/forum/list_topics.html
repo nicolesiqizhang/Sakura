@@ -1,0 +1,19 @@
+{% if topic_list %}
+<ul>
+    {% for topic in topic_list %}
+    <li><a href="/forum/topic/{{ topic.id }}"> {{topic.topic_name}} : {{topic.topic_description}} </a></li>
+    {% endfor %}
+</ul>
+{% else %}
+<p> No topics yet. </p>
+{% endif %}
+
+{% block content %}
+<form action="" method="post">
+    {% csrf_token %}
+    <table>
+        {{creation_form.as_table}}
+    </table>
+    <input type="submit", value="Create">
+</form>
+{% endblock  %}
