@@ -1,4 +1,6 @@
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
+from django.urls import reverse
 
 from .forms.thread_creation_form import ThreadCreationForm
 from .forms.topic_creation_form import TopicCreationForm
@@ -22,12 +24,37 @@ def list_topics(request):
             return render(request, 'forum/list_topics.html', context)
     else:
         topic_list = Topic.objects.all()
+        voted_topics = []
+        for topic in topic_list:
+            if topic.likes.filter(id=1).exists():
+                voted_topics.append(topic.id)
         creation_form = TopicCreationForm()
-        context = {'topic_list': topic_list, 'creation_form': creation_form}
+        context = {'topic_list': topic_list, 'creation_form': creation_form,
+                   'voted_topics': voted_topics}
         return render(request, 'forum/list_topics.html', context)
 
 
-def list_threads(request, topic_id):
+def like_topic(request, topic_id):
+    topic = get_object_or_404(Topic, pk=topic_id)
+    default_customer = get_object_or_404(Customer, pk=1)
+    liked = False
+    if topic.likes.filter(id=default_customer.id).exists():
+        topic.likes.remove(default_customer)
+    else:
+        topic.likes.add(default_customer)
+        liked = True
+
+    topic.save()
+    topic_list = Topic.objects.all()
+    creation_form = TopicCreationForm()
+    context = {'topic_list': topic_list, 'creation_form': creation_form,
+               "topic_id": topic_id,
+               "liked": liked}
+    # return render(request, 'forum/list_topics.html', context)
+    return HttpResponseRedirect(reverse('list_topics'))
+
+
+def list_topic_threads(request, topic_id):
     topic = get_object_or_404(Topic, pk=topic_id)
     if request.method == 'POST':
         form = ThreadCreationForm(request.POST)

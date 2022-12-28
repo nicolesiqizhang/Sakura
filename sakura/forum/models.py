@@ -1,7 +1,5 @@
-from django.db import models
 from django.contrib.auth.models import User
-
-import datetime
+from django.db import models
 
 
 # Create your models here.
@@ -15,6 +13,8 @@ class Topic(models.Model):
     topic_description = models.TextField()
     topic_creator = models.ForeignKey(Customer, on_delete=models.CASCADE)
     creation_time = models.DateTimeField('creation time', auto_now_add=True)
+    likes = models.ManyToManyField(Customer, related_name="like", blank=True)
+    dislikes = models.ManyToManyField(Customer, related_name="dislike")
 
     @classmethod
     def create(cls, topic_name, topic_description):

@@ -1,7 +1,24 @@
 {% if topic_list %}
 <ul>
     {% for topic in topic_list %}
-    <li><a href="/forum/topic/{{ topic.id }}"> {{topic.topic_name}} : {{topic.topic_description}} </a></li>
+    <li>
+        {{topic.creation_time}}
+        <a href="/forum/topic/{{ topic.id }}"> {{topic.topic_name}} :
+            {{topic.topic_description}} </a>&emsp;
+        total threads: {{ topic.thread_set.all.count}}&emsp;
+        total like: {{topic.likes.count}}
+        {% if topic.id in voted_topics %}
+        <form action="{% url 'like_topic' topic.id %}" method="post">
+            {% csrf_token %}
+            <input type="submit" , value="unlike">
+        </form>
+        {% else %}
+        <form action="{% url 'like_topic' topic.id %}" method="post">
+            {% csrf_token %}
+            <input type="submit" , value="like">
+        </form>
+        {%endif%}
+    </li>
     {% endfor %}
 </ul>
 {% else %}
@@ -14,6 +31,6 @@
     <table>
         {{creation_form.as_table}}
     </table>
-    <input type="submit", value="Create">
+    <input type="submit" , value="Create">
 </form>
 {% endblock  %}
