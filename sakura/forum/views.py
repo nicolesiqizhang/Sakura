@@ -12,6 +12,8 @@ from .models import Topic
 # Create your views here.
 def list_topics(request):
     if request.method == 'POST':
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(reverse('login'))
         form = TopicCreationForm(request.POST)
         if form.is_valid():
             new_topic = Topic.create(form.cleaned_data['topic_name'],
@@ -25,9 +27,10 @@ def list_topics(request):
     else:
         topic_list = Topic.objects.all()
         voted_topics = []
-        for topic in topic_list:
-            if topic.likes.filter(id=1).exists():
-                voted_topics.append(topic.id)
+        if request.user.is_authenticated:
+            for topic in topic_list:
+                if topic.likes.filter(id=1).exists():
+                    voted_topics.append(topic.id)
         creation_form = TopicCreationForm()
         context = {'topic_list': topic_list, 'creation_form': creation_form,
                    'voted_topics': voted_topics}
@@ -50,7 +53,6 @@ def like_topic(request, topic_id):
     context = {'topic_list': topic_list, 'creation_form': creation_form,
                "topic_id": topic_id,
                "liked": liked}
-    # return render(request, 'forum/list_topics.html', context)
     return HttpResponseRedirect(reverse('list_topics'))
 
 
